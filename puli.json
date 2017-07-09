@@ -1,0 +1,10 @@
+{
+    "version": "1.0",
+    "bindings": {
+        "6e73cd63-8035-41d0-a6d3-46d9375fc8ae": {
+            "_class": "Puli\\Discovery\\Binding\\ClassBinding",
+            "class": "Kelunik\\Http\\Adapter\\Artax\\Client",
+            "type": "Http\\Client\\HttpClient"
+        }
+    }
+}
