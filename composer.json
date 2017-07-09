@@ -1,0 +1,32 @@
+{
+    "name": "kelunik/php-http-artax",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Niklas Keller",
+            "email": "me@kelunik.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Kelunik\\Http\\Adapter\\Artax\\": "src"
+        }
+    },
+    "require": {
+        "amphp/artax": "dev-master",
+        "php-http/httplug": "^1.1",
+        "php-http/discovery": "^1.2"
+    },
+    "require-dev": {
+        "amphp/phpunit-util": "^1",
+        "php-http/client-integration-tests": "^0.6.0",
+        "php-http/message": "^1.6"
+    },
+    "provide": {
+        "php-http/client-implementation": "1.0"
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit"
+    }
+}
