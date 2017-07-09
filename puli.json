@@ -1,5 +1,6 @@
 {
     "version": "1.0",
+    "name": "kelunik/php-http-artax",
     "bindings": {
         "6e73cd63-8035-41d0-a6d3-46d9375fc8ae": {
             "_class": "Puli\\Discovery\\Binding\\ClassBinding",
