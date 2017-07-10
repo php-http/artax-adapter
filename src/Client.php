@@ -13,19 +13,22 @@ use Http\Message\StreamFactory;
 use Psr\Http\Message\RequestInterface;
 use function Amp\call;
 
-class Client implements HttpClient {
+class Client implements HttpClient
+{
     private $client;
     private $responseFactory;
     private $streamFactory;
 
-    public function __construct(Artax\Client $client = null, ResponseFactory $responseFactory = null, StreamFactory $streamFactory = null) {
-        $this->client = $client ?? new Artax\DefaultClient;
+    public function __construct(Artax\Client $client = null, ResponseFactory $responseFactory = null, StreamFactory $streamFactory = null)
+    {
+        $this->client = $client ?? new Artax\DefaultClient();
         $this->responseFactory = $responseFactory ?? MessageFactoryDiscovery::find();
         $this->streamFactory = $streamFactory ?? StreamFactoryDiscovery::find();
     }
 
-    /** @inheritdoc */
-    public function sendRequest(RequestInterface $request) {
+    /** {@inheritdoc} */
+    public function sendRequest(RequestInterface $request)
+    {
         return Promise\wait(call(function () use ($request) {
             /** @var Artax\Request $req */
             $req = new Artax\Request($request->getUri(), $request->getMethod());
