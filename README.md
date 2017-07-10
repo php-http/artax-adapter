@@ -20,7 +20,7 @@ $ composer require php-http/artax-adapter
 
 ## Documentation
 
-Please see the [official documentation](http://docs.php-http.org/en/latest/clients/react-adapter.html).
+Please see the [official documentation](http://docs.php-http.org/en/latest/clients/artax-adapter.html).
 
 
 ## Testing
