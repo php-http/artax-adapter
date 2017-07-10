@@ -14,7 +14,8 @@
         }
     },
     "require": {
-        "amphp/artax": "^3",
+        "php": "^7.0",
+        "amphp/artax": "^3.0",
         "php-http/httplug": "^1.1",
         "php-http/discovery": "^1.2"
     },
