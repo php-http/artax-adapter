@@ -9,7 +9,6 @@ cache:
 php:
     - 7.0
     - 7.1
-    - hhvm
 
 env:
     global:
@@ -22,7 +21,7 @@ branches:
 matrix:
     fast_finish: true
     include:
-        - php: 5.5
+        - php: 7.0
           env: COMPOSER_FLAGS="--prefer-stable --prefer-lowest" COVERAGE=true TEST_COMMAND="composer test-ci"
 
 before_install:
@@ -32,6 +31,9 @@ install:
     # To be removed when this issue will be resolved: https://github.com/composer/composer/issues/5355
     - if [[ "$COMPOSER_FLAGS" == *"--prefer-lowest"* ]]; then travis_retry composer update --prefer-dist --no-interaction --prefer-stable --quiet; fi
     - travis_retry composer update ${COMPOSER_FLAGS} --prefer-dist --no-interaction
+
+before_script:
+    - vendor/bin/http_test_server > /dev/null 2>&1 &
 
 script:
     - $TEST_COMMAND
