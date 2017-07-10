@@ -1,5 +1,5 @@
 {
-    "name": "kelunik/php-http-artax",
+    "name": "php-http/artax-adapter",
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -10,11 +10,11 @@
     ],
     "autoload": {
         "psr-4": {
-            "Kelunik\\Http\\Adapter\\Artax\\": "src"
+            "Http\\Adapter\\Artax\\": "src"
         }
     },
     "require": {
-        "amphp/artax": "dev-master",
+        "amphp/artax": "^3",
         "php-http/httplug": "^1.1",
         "php-http/discovery": "^1.2"
     },

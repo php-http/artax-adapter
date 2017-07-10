@@ -1,6 +1,6 @@
 <?php
 
-namespace Kelunik\Http\Adapter\Artax;
+namespace Http\Adapter\Artax;
 
 use Amp\Artax;
 use Amp\Promise;

@@ -1,11 +1,11 @@
 <?php
 
-namespace Kelunik\Http\Adapter\Artax\Test;
+namespace Http\Adapter\Artax\Test;
 
 use Amp\Artax;
 use Http\Client\HttpClient;
 use Http\Client\Tests\HttpClientTest;
-use Kelunik\Http\Adapter\Artax\Client;
+use Http\Adapter\Artax\Client;
 
 class ClientTest extends HttpClientTest {
     /** @return HttpClient */
