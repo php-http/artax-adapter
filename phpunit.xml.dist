@@ -2,7 +2,7 @@
 <phpunit colors="true" bootstrap="vendor/autoload.php">
     <testsuites>
         <testsuite name="Artax Adapter Test Suite">
-            <directory>test</directory>
+            <directory>tests/</directory>
         </testsuite>
     </testsuites>
     <php>
