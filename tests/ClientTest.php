@@ -17,17 +17,4 @@ class ClientTest extends HttpClientTest
 
         return new Client($client);
     }
-
-    /**
-     * @dataProvider requestProvider
-     * @group        integration
-     */
-    public function testSendRequest($method, $uri, array $headers, $body)
-    {
-        if ($method === 'TRACE') {
-            $this->markTestSkipped('Currently skipped, because Artax refuses to send bodies for TRACE requests');
-        }
-
-        parent::testSendRequest($method, $uri, $headers, $body);
-    }
 }
