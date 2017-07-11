@@ -1,6 +1,7 @@
 /.php_cs
 /behat.yml
 /build/
+/coverage
 /composer.lock
 /phpspec.yml
 /phpunit.xml
