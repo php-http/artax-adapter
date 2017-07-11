@@ -3,7 +3,9 @@
 namespace Http\Adapter\Artax;
 
 use Amp\Artax;
+use Amp\CancellationTokenSource;
 use Amp\Promise;
+use Http\Adapter\Artax\Internal\ResponseStream;
 use Http\Client\Exception\RequestException;
 use Http\Client\HttpClient;
 use Http\Discovery\MessageFactoryDiscovery;
@@ -30,6 +32,8 @@ class Client implements HttpClient
     public function sendRequest(RequestInterface $request)
     {
         return Promise\wait(call(function () use ($request) {
+            $cancellationTokenSource = new CancellationTokenSource();
+
             /** @var Artax\Request $req */
             $req = new Artax\Request($request->getUri(), $request->getMethod());
             $req = $req->withProtocolVersions([$request->getProtocolVersion()]);
@@ -40,25 +44,16 @@ class Client implements HttpClient
                 /** @var Artax\Response $resp */
                 $resp = yield $this->client->request($req, [
                     Artax\Client::OP_MAX_REDIRECTS => 0,
-                ]);
+                ], $cancellationTokenSource->getToken());
             } catch (Artax\HttpException $e) {
                 throw new RequestException($e->getMessage(), $request, $e);
             }
-
-            $respBody = $resp->getBody();
-            $bodyStream = $this->streamFactory->createStream();
-
-            while (null !== $chunk = yield $respBody->read()) {
-                $bodyStream->write($chunk);
-            }
-
-            $bodyStream->rewind();
 
             return $this->responseFactory->createResponse(
                 $resp->getStatus(),
                 $resp->getReason(),
                 $resp->getHeaders(),
-                $bodyStream,
+                new ResponseStream($resp->getBody()->getInputStream(), $cancellationTokenSource),
                 $resp->getProtocolVersion()
             );
         }));
