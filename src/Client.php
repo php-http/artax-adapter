@@ -9,9 +9,7 @@ use Http\Adapter\Artax\Internal\ResponseStream;
 use Http\Client\Exception\RequestException;
 use Http\Client\HttpClient;
 use Http\Discovery\MessageFactoryDiscovery;
-use Http\Discovery\StreamFactoryDiscovery;
 use Http\Message\ResponseFactory;
-use Http\Message\StreamFactory;
 use Psr\Http\Message\RequestInterface;
 use function Amp\call;
 
@@ -19,13 +17,11 @@ class Client implements HttpClient
 {
     private $client;
     private $responseFactory;
-    private $streamFactory;
 
-    public function __construct(Artax\Client $client = null, ResponseFactory $responseFactory = null, StreamFactory $streamFactory = null)
+    public function __construct(Artax\Client $client = null, ResponseFactory $responseFactory = null)
     {
         $this->client = $client ?? new Artax\DefaultClient();
         $this->responseFactory = $responseFactory ?? MessageFactoryDiscovery::find();
-        $this->streamFactory = $streamFactory ?? StreamFactoryDiscovery::find();
     }
 
     /** {@inheritdoc} */
