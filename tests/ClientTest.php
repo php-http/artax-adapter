@@ -6,7 +6,6 @@ use Amp\Artax;
 use Http\Adapter\Artax\Client;
 use Http\Client\HttpClient;
 use Http\Client\Tests\HttpClientTest;
-use Http\Message\StreamFactory;
 
 class ClientTest extends HttpClientTest
 {

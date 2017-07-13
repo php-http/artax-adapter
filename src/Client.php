@@ -33,7 +33,7 @@ class Client implements HttpClient
         $this->responseFactory = $responseFactory ?? MessageFactoryDiscovery::find();
 
         if ($streamFactory !== null || \func_num_args() === 3) {
-            \trigger_error('The $streamFactory parameter is deprecated and ignored.', \E_USER_DEPRECATED);
+            @\trigger_error('The $streamFactory parameter is deprecated and ignored.', \E_USER_DEPRECATED);
         }
     }
 
