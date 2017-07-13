@@ -10,6 +10,7 @@ use Http\Client\Exception\RequestException;
 use Http\Client\HttpClient;
 use Http\Discovery\MessageFactoryDiscovery;
 use Http\Message\ResponseFactory;
+use Http\Message\StreamFactory;
 use Psr\Http\Message\RequestInterface;
 use function Amp\call;
 
@@ -18,10 +19,22 @@ class Client implements HttpClient
     private $client;
     private $responseFactory;
 
-    public function __construct(Artax\Client $client = null, ResponseFactory $responseFactory = null)
-    {
+    /**
+     * @param Artax\Client    $client          HTTP client implementation.
+     * @param ResponseFactory $responseFactory Response factory to use or `null` to attempt auto-discovery.
+     * @param StreamFactory   $streamFactory   This parameter will be ignored and removed in the next major version.
+     */
+    public function __construct(
+        Artax\Client $client = null,
+        ResponseFactory $responseFactory = null,
+        StreamFactory $streamFactory = null
+    ) {
         $this->client = $client ?? new Artax\DefaultClient();
         $this->responseFactory = $responseFactory ?? MessageFactoryDiscovery::find();
+
+        if ($streamFactory !== null || \func_num_args() === 3) {
+            \trigger_error('The $streamFactory parameter is deprecated and ignored.', \E_USER_DEPRECATED);
+        }
     }
 
     /** {@inheritdoc} */
