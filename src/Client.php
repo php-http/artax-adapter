@@ -4,9 +4,8 @@ namespace Http\Adapter\Artax;
 
 use Amp\Artax;
 use Amp\CancellationTokenSource;
-use Amp\Promise;
-use Http\Adapter\Artax\Internal\ResponseStream;
 use Http\Client\Exception\RequestException;
+use Http\Client\HttpAsyncClient;
 use Http\Client\HttpClient;
 use Http\Discovery\MessageFactoryDiscovery;
 use Http\Message\ResponseFactory;
@@ -14,7 +13,7 @@ use Http\Message\StreamFactory;
 use Psr\Http\Message\RequestInterface;
 use function Amp\call;
 
-class Client implements HttpClient
+class Client implements HttpClient, HttpAsyncClient
 {
     private $client;
     private $responseFactory;
@@ -40,31 +39,39 @@ class Client implements HttpClient
     /** {@inheritdoc} */
     public function sendRequest(RequestInterface $request)
     {
-        return Promise\wait(call(function () use ($request) {
-            $cancellationTokenSource = new CancellationTokenSource();
+        return $this->sendAsyncRequest($request)->wait();
+    }
 
-            /** @var Artax\Request $req */
-            $req = new Artax\Request($request->getUri(), $request->getMethod());
-            $req = $req->withProtocolVersions([$request->getProtocolVersion()]);
-            $req = $req->withHeaders($request->getHeaders());
-            $req = $req->withBody((string) $request->getBody());
+    /** {@inheritdoc} */
+    public function sendAsyncRequest(RequestInterface $request)
+    {
+        return new Internal\Promise(
+            call(function () use ($request) {
+                $cancellationTokenSource = new CancellationTokenSource();
 
-            try {
-                /** @var Artax\Response $resp */
-                $resp = yield $this->client->request($req, [
-                    Artax\Client::OP_MAX_REDIRECTS => 0,
-                ], $cancellationTokenSource->getToken());
-            } catch (Artax\HttpException $e) {
-                throw new RequestException($e->getMessage(), $request, $e);
-            }
+                /** @var Artax\Request $req */
+                $req = new Artax\Request($request->getUri(), $request->getMethod());
+                $req = $req->withProtocolVersions([$request->getProtocolVersion()]);
+                $req = $req->withHeaders($request->getHeaders());
+                $req = $req->withBody((string) $request->getBody());
 
-            return $this->responseFactory->createResponse(
-                $resp->getStatus(),
-                $resp->getReason(),
-                $resp->getHeaders(),
-                new ResponseStream($resp->getBody()->getInputStream(), $cancellationTokenSource),
-                $resp->getProtocolVersion()
-            );
-        }));
+                try {
+                    /** @var Artax\Response $resp */
+                    $resp = yield $this->client->request($req, [
+                        Artax\Client::OP_MAX_REDIRECTS => 0,
+                    ], $cancellationTokenSource->getToken());
+                } catch (Artax\HttpException $e) {
+                    throw new RequestException($e->getMessage(), $request, $e);
+                }
+
+                return $this->responseFactory->createResponse(
+                    $resp->getStatus(),
+                    $resp->getReason(),
+                    $resp->getHeaders(),
+                    new Internal\ResponseStream($resp->getBody()->getInputStream(), $cancellationTokenSource),
+                    $resp->getProtocolVersion()
+                );
+            })
+        );
     }
 }
