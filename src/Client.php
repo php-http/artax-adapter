@@ -32,7 +32,7 @@ class Client implements HttpClient
         $this->client = $client ?? new Artax\DefaultClient();
         $this->responseFactory = $responseFactory ?? MessageFactoryDiscovery::find();
 
-        if ($streamFactory !== null || \func_num_args() === 3) {
+        if (null !== $streamFactory || 3 === \func_num_args()) {
             @\trigger_error('The $streamFactory parameter is deprecated and ignored.', \E_USER_DEPRECATED);
         }
     }

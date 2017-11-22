@@ -114,7 +114,7 @@ class ResponseStream implements StreamInterface
             return '';
         }
 
-        if ($this->buffer === '') {
+        if ('' === $this->buffer) {
             try {
                 $this->buffer = Promise\wait($this->body->read());
             } catch (Artax\HttpException $e) {
@@ -123,7 +123,7 @@ class ResponseStream implements StreamInterface
                 throw new \RuntimeException('Reading from the stream failed', 0, $e);
             }
 
-            if ($this->buffer === null) {
+            if (null === $this->buffer) {
                 $this->eof = true;
 
                 return '';
@@ -150,6 +150,6 @@ class ResponseStream implements StreamInterface
 
     public function getMetadata($key = null)
     {
-        return $key === null ? [] : null;
+        return null === $key ? [] : null;
     }
 }
