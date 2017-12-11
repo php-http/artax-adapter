@@ -59,7 +59,11 @@ class Promise implements HttpPromise, AmpPromise
             return $response;
         };
 
-        $onRejected = $onRejected ?? function (Exception $exception) {
+        $onRejected = $onRejected ?? function (\Throwable $exception) {
+            if (!$exception instanceof Exception) {
+                $exception = new Exception\TransferException($exception->getMessage(), 0, $exception);
+            }
+
             throw $exception;
         };
 
@@ -68,6 +72,8 @@ class Promise implements HttpPromise, AmpPromise
                 $deferred->resolve($onFulfilled($response));
             } catch (Exception $exception) {
                 $deferred->fail($exception);
+            } catch (\Throwable $error) {
+                $deferred->fail(new Exception\TransferException($error->getMessage(), 0, $error));
             }
         };
 
@@ -76,6 +82,8 @@ class Promise implements HttpPromise, AmpPromise
                 $deferred->resolve($onRejected($exception));
             } catch (Exception $exception) {
                 $deferred->fail($exception);
+            } catch (\Throwable $error) {
+                $deferred->fail(new Exception\TransferException($error->getMessage(), 0, $error));
             }
         };
 
