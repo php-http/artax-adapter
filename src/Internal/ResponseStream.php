@@ -9,6 +9,7 @@ use Amp\CancellationTokenSource;
 use Amp\CancelledException;
 use Amp\Emitter;
 use Amp\Promise;
+use Http\Client\Exception\TransferException;
 use Psr\Http\Message\StreamInterface;
 
 /**
@@ -118,9 +119,9 @@ class ResponseStream implements StreamInterface
             try {
                 $this->buffer = Promise\wait($this->body->read());
             } catch (Artax\HttpException $e) {
-                throw new \RuntimeException('Reading from the stream failed', 0, $e);
+                throw new TransferException('Reading from the stream failed', 0, $e);
             } catch (CancelledException $e) {
-                throw new \RuntimeException('Reading from the stream failed', 0, $e);
+                throw new TransferException('Reading from the stream failed', 0, $e);
             }
 
             if ($this->buffer === null) {
