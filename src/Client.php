@@ -4,7 +4,9 @@ namespace Http\Adapter\Artax;
 
 use Amp\Artax;
 use Amp\CancellationTokenSource;
+use Amp\Promise;
 use Http\Client\Exception\RequestException;
+use Http\Client\Exception\TransferException;
 use Http\Client\HttpAsyncClient;
 use Http\Client\HttpClient;
 use Http\Discovery\MessageFactoryDiscovery;
@@ -39,14 +41,19 @@ class Client implements HttpClient, HttpAsyncClient
     /** {@inheritdoc} */
     public function sendRequest(RequestInterface $request)
     {
-        return $this->sendAsyncRequest($request)->wait();
+        return $this->doRequest($request)->wait();
     }
 
     /** {@inheritdoc} */
     public function sendAsyncRequest(RequestInterface $request)
     {
+        return $this->doRequest($request, true);
+    }
+
+    protected function doRequest(RequestInterface $request, $async = false): Promise
+    {
         return new Internal\Promise(
-            call(function () use ($request) {
+            call(function () use ($request, $async) {
                 $cancellationTokenSource = new CancellationTokenSource();
 
                 /** @var Artax\Request $req */
@@ -62,15 +69,19 @@ class Client implements HttpClient, HttpAsyncClient
                     ], $cancellationTokenSource->getToken());
                 } catch (Artax\HttpException $e) {
                     throw new RequestException($e->getMessage(), $request, $e);
+                } catch (\Throwable $e) {
+                    throw new TransferException($e->getMessage(), 0, $e);
                 }
 
-                return $this->responseFactory->createResponse(
+                $response = $this->responseFactory->createResponse(
                     $resp->getStatus(),
                     $resp->getReason(),
                     $resp->getHeaders(),
-                    new Internal\ResponseStream($resp->getBody()->getInputStream(), $cancellationTokenSource),
+                    new Internal\ResponseStream($resp->getBody()->getInputStream(), $cancellationTokenSource, $async),
                     $resp->getProtocolVersion()
                 );
+
+                return $response;
             })
         );
     }

@@ -40,9 +40,17 @@ class Promise implements HttpPromise, AmpPromise
         $this->promise = $promise;
         $this->promise->onResolve(function ($error, $result) {
             if ($error !== null) {
+                if (!$error instanceof Exception) {
+                    $error = new Exception\TransferException($error->getMessage(), 0, $error);
+                }
+
                 $this->reject($error);
             } else {
-                $this->resolve($result);
+                if (!$result instanceof ResponseInterface) {
+                    $this->reject(new Exception\TransferException('Bad reponse returned'));
+                } else {
+                    $this->resolve($result);
+                }
             }
         });
     }

@@ -42,7 +42,7 @@ class ResponseStreamTest extends TestCase
     public function testReadSlowStream()
     {
         $inputStream = new IteratorStream(fromIterable(['a', 'b', 'c'], 100));
-        $stream = new ResponseStream($inputStream, new CancellationTokenSource());
+        $stream = new ResponseStream($inputStream, new CancellationTokenSource(), false);
         $this->assertTrue($stream->isReadable());
 
         $this->assertSame('abc', (string) $stream);

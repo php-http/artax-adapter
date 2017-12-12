@@ -8,6 +8,7 @@ use Amp\ByteStream\IteratorStream;
 use Amp\CancellationTokenSource;
 use Amp\CancelledException;
 use Amp\Emitter;
+use Amp\Loop;
 use Amp\Promise;
 use Http\Client\Exception\TransferException;
 use Psr\Http\Message\StreamInterface;
@@ -17,7 +18,7 @@ use Psr\Http\Message\StreamInterface;
  *
  * @internal
  */
-class ResponseStream implements StreamInterface
+class ResponseStream implements StreamInterface, AsyncReadableStreamInterface
 {
     private $buffer = '';
     private $position = 0;
@@ -25,15 +26,17 @@ class ResponseStream implements StreamInterface
 
     private $body;
     private $cancellationTokenSource;
+    private $async = false;
 
     /**
      * @param InputStream             $body                    HTTP response stream to wrap.
      * @param CancellationTokenSource $cancellationTokenSource Cancellation source bound to the request to abort it.
      */
-    public function __construct(InputStream $body, CancellationTokenSource $cancellationTokenSource)
+    public function __construct(InputStream $body, CancellationTokenSource $cancellationTokenSource, $async = true)
     {
         $this->body = $body;
         $this->cancellationTokenSource = $cancellationTokenSource;
+        $this->async = $async;
     }
 
     public function __toString()
@@ -106,47 +109,69 @@ class ResponseStream implements StreamInterface
 
     public function isReadable()
     {
-        return true;
+        return !$this->async;
     }
 
     public function read($length)
     {
-        if ($this->eof) {
-            return '';
+        if ($this->async) {
+            throw new \RuntimeException('Stream is only readable in async');
         }
 
-        if ($this->buffer === '') {
-            try {
-                $this->buffer = Promise\wait($this->body->read());
-            } catch (Artax\HttpException $e) {
-                throw new TransferException('Reading from the stream failed', 0, $e);
-            } catch (CancelledException $e) {
-                throw new TransferException('Reading from the stream failed', 0, $e);
-            }
-
-            if ($this->buffer === null) {
-                $this->eof = true;
-
-                return '';
-            }
-        }
-
-        $read = \substr($this->buffer, 0, $length);
-        $this->buffer = (string) \substr($this->buffer, $length);
-        $this->position += \strlen($read);
-
-        return $read;
+        return Promise\wait($this->readAsync($length));
     }
 
     public function getContents()
     {
-        $buffer = '';
-
-        while (!$this->eof()) {
-            $buffer .= $this->read(8192 * 8);
+        if ($this->async) {
+            throw new \RuntimeException('Stream is only readable in async');
         }
 
-        return $buffer;
+        return Promise\wait($this->getContentsAsync());
+    }
+
+    public function readAsync($length)
+    {
+        return \Amp\call(function () use($length) {
+            if ($this->eof) {
+                return '';
+            }
+
+            while (\strlen($this->buffer) < $length) {
+                $readed = yield $this->body->read();
+
+                if ($readed === null) {
+                    $this->eof = true;
+                    break;
+                }
+
+                $this->buffer .= $readed;
+            }
+
+            $read = \substr($this->buffer, 0, $length);
+            $this->buffer = (string) \substr($this->buffer, $length);
+            $this->position += \strlen($read);
+
+            return $read;
+        });
+    }
+
+    public function getContentsAsync()
+    {
+        return \Amp\call(function () {
+            $contents = '';
+
+            while (!$this->eof()) {
+                $contents .= yield $this->readAsync(8192 * 8);
+            }
+
+            return $contents;
+        });
+    }
+
+    public function isReadableAsync()
+    {
+        return $this->async;
     }
 
     public function getMetadata($key = null)
