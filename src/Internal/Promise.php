@@ -39,7 +39,7 @@ class Promise implements HttpPromise, AmpPromise
     {
         $this->promise = $promise;
         $this->promise->onResolve(function ($error, $result) {
-            if (null === $error) {
+            if (null !== $error) {
                 if (!$error instanceof Exception) {
                     $error = new Exception\TransferException($error->getMessage(), 0, $error);
                 }
