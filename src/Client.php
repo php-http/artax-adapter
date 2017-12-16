@@ -41,19 +41,14 @@ class Client implements HttpClient, HttpAsyncClient
     /** {@inheritdoc} */
     public function sendRequest(RequestInterface $request)
     {
-        return $this->doRequest($request)->wait();
+        return $this->sendAsyncRequest($request)->wait();
     }
 
     /** {@inheritdoc} */
     public function sendAsyncRequest(RequestInterface $request)
     {
-        return $this->doRequest($request, true);
-    }
-
-    protected function doRequest(RequestInterface $request, $async = false): Promise
-    {
         return new Internal\Promise(
-            call(function () use ($request, $async) {
+            call(function () use ($request) {
                 $cancellationTokenSource = new CancellationTokenSource();
 
                 /** @var Artax\Request $req */
@@ -77,7 +72,7 @@ class Client implements HttpClient, HttpAsyncClient
                     $resp->getStatus(),
                     $resp->getReason(),
                     $resp->getHeaders(),
-                    new Internal\ResponseStream($resp->getBody()->getInputStream(), $cancellationTokenSource, $async),
+                    yield $resp->getBody(),
                     $resp->getProtocolVersion()
                 );
 
