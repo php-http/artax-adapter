@@ -35,6 +35,8 @@ class AsyncClientTest extends HttpAsyncClientTest
             } catch (\Throwable $e) {
                 $exception = $e;
             }
+
+            Loop::stop();
         });
 
         if (null !== $exception) {
