@@ -4,7 +4,6 @@ namespace Http\Adapter\Artax;
 
 use Amp\Artax;
 use Amp\CancellationTokenSource;
-use Amp\Promise;
 use Http\Client\Exception\RequestException;
 use Http\Client\Exception\TransferException;
 use Http\Client\HttpAsyncClient;
@@ -18,6 +17,7 @@ use function Amp\call;
 class Client implements HttpClient, HttpAsyncClient
 {
     private $client;
+
     private $responseFactory;
 
     /**
@@ -33,7 +33,7 @@ class Client implements HttpClient, HttpAsyncClient
         $this->client = $client ?? new Artax\DefaultClient();
         $this->responseFactory = $responseFactory ?? MessageFactoryDiscovery::find();
 
-        if ($streamFactory !== null || \func_num_args() === 3) {
+        if (null === $streamFactory || 3 === \func_num_args()) {
             @\trigger_error('The $streamFactory parameter is deprecated and ignored.', \E_USER_DEPRECATED);
         }
     }
