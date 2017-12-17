@@ -23,6 +23,12 @@ class AsyncClientTest extends HttpAsyncClientTest
         return new Client($client);
     }
 
+    /**
+     * Test using the async method in an existing loop.
+     *
+     * As an example a stream implementation of PSR7 using the \Amp\wait function
+     * would fail in an existing loop. This test prevent regression of this behavior.
+     */
     public function testInLoop()
     {
         Loop::run(function () use (&$content, &$response, &$exception) {
