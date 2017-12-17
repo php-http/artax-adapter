@@ -4,6 +4,7 @@ namespace Http\Adapter\Artax;
 
 use Amp\Artax;
 use Amp\CancellationTokenSource;
+use Amp\Promise;
 use Http\Client\Exception\RequestException;
 use Http\Client\Exception\TransferException;
 use Http\Client\HttpAsyncClient;
@@ -41,14 +42,19 @@ class Client implements HttpClient, HttpAsyncClient
     /** {@inheritdoc} */
     public function sendRequest(RequestInterface $request)
     {
-        return $this->sendAsyncRequest($request)->wait();
+        return $this->doRequest($request)->wait();
     }
 
     /** {@inheritdoc} */
     public function sendAsyncRequest(RequestInterface $request)
     {
+        return $this->doRequest($request, false);
+    }
+
+    protected function doRequest(RequestInterface $request, $useInternalStream = true): Promise
+    {
         return new Internal\Promise(
-            call(function () use ($request) {
+            call(function () use ($request, $useInternalStream) {
                 $cancellationTokenSource = new CancellationTokenSource();
 
                 /** @var Artax\Request $req */
@@ -68,11 +74,17 @@ class Client implements HttpClient, HttpAsyncClient
                     throw new TransferException($e->getMessage(), 0, $e);
                 }
 
+                if ($useInternalStream) {
+                    $body = new Internal\ResponseStream($resp->getBody()->getInputStream(), $cancellationTokenSource);
+                } else {
+                    $body = yield $resp->getBody();
+                }
+
                 $response = $this->responseFactory->createResponse(
                     $resp->getStatus(),
                     $resp->getReason(),
                     $resp->getHeaders(),
-                    yield $resp->getBody(),
+                    $body,
                     $resp->getProtocolVersion()
                 );
 
