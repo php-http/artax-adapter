@@ -4,7 +4,7 @@ declare(ticks=1);
 
 namespace Http\Adapter\Artax\Test;
 
-use Amp\Artax;
+use Amp\Http\Client\HttpClientBuilder;
 use Amp\Loop;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
@@ -15,10 +15,9 @@ use Http\Client\Tests\HttpAsyncClientTest;
 class AsyncClientTest extends HttpAsyncClientTest
 {
     /** @return HttpAsyncClient */
-    protected function createHttpAsyncClient()
+    protected function createHttpAsyncClient() : HttpAsyncClient
     {
-        $client = new Artax\DefaultClient();
-        $client->setOption(Artax\Client::OP_TRANSFER_TIMEOUT, 1000);
+        $client = HttpClientBuilder::buildDefault();
 
         return new Client($client);
     }

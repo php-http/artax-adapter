@@ -2,18 +2,18 @@
 
 namespace Http\Adapter\Artax\Test;
 
-use Amp\Artax;
+use Amp\Http\Client\HttpClientBuilder;
 use Http\Adapter\Artax\Client;
 use Http\Client\HttpClient;
 use Http\Client\Tests\HttpClientTest;
+use Psr\Http\Client\ClientInterface;
 
 class ClientTest extends HttpClientTest
 {
     /** @return HttpClient */
-    protected function createHttpAdapter()
+    protected function createHttpAdapter() : ClientInterface
     {
-        $client = new Artax\DefaultClient();
-        $client->setOption(Artax\Client::OP_TRANSFER_TIMEOUT, 1000);
+        $client = HttpClientBuilder::buildDefault();
 
         return new Client($client);
     }
