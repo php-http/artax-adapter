@@ -11,24 +11,24 @@ use Amp\Promise;
 use Http\Client\Exception\RequestException;
 use Http\Client\Exception\TransferException;
 use Http\Client\HttpAsyncClient;
-use Http\Client\HttpClient;
 use Http\Discovery\Psr17FactoryDiscovery;
 use Http\Message\ResponseFactory;
 use Http\Message\StreamFactory;
+use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use function Amp\call;
 
-class Client implements HttpClient, HttpAsyncClient
+class Client implements ClientInterface, HttpAsyncClient
 {
     private $client;
 
     private $responseFactory;
 
     /**
-     * @param AmpHttpClient $client          HTTP client implementation.
-     * @param ResponseFactory        $responseFactory Response factory to use or `null` to attempt auto-discovery.
-     * @param StreamFactory          $streamFactory   This parameter will be ignored and removed in the next major version.
+     * @param AmpHttpClient   $client          HTTP client implementation.
+     * @param ResponseFactory $responseFactory Response factory to use or `null` to attempt auto-discovery.
+     * @param StreamFactory   $streamFactory   This parameter will be ignored and removed in the next major version.
      */
     public function __construct(
         AmpHttpClient $client = null,
@@ -62,7 +62,6 @@ class Client implements HttpClient, HttpAsyncClient
                 $cancellationTokenSource = new CancellationTokenSource();
 
                 $req = new Request($request->getUri(), $request->getMethod(), (string) $request->getBody());
-//                $req = $req->withProtocolVersions([$request->getProtocolVersion()]);
                 foreach ($request->getHeaders() as $headerName => $headerValue) {
                     $req->addHeader($headerName, $headerValue);
                 }
