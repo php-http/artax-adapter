@@ -2,12 +2,12 @@
 
 namespace Http\Adapter\Artax\Internal;
 
-use Amp\Artax;
 use Amp\ByteStream\InputStream;
 use Amp\ByteStream\IteratorStream;
 use Amp\CancellationTokenSource;
 use Amp\CancelledException;
 use Amp\Emitter;
+use Amp\Http\Client\HttpException;
 use Amp\Promise;
 use Psr\Http\Message\StreamInterface;
 
@@ -57,7 +57,7 @@ class ResponseStream implements StreamInterface
         $this->cancellationTokenSource->cancel();
 
         $emitter = new Emitter();
-        $emitter->fail(new Artax\HttpException('The stream has been closed'));
+        $emitter->fail(new HttpException('The stream has been closed'));
         $this->body = new IteratorStream($emitter->iterate());
     }
 
@@ -120,7 +120,7 @@ class ResponseStream implements StreamInterface
         if ('' === $this->buffer) {
             try {
                 $this->buffer = Promise\wait($this->body->read());
-            } catch (Artax\HttpException $e) {
+            } catch (HttpException $e) {
                 throw new \RuntimeException('Reading from the stream failed', 0, $e);
             } catch (CancelledException $e) {
                 throw new \RuntimeException('Reading from the stream failed', 0, $e);
